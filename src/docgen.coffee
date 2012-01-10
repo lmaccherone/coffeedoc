@@ -19,6 +19,8 @@ OPTIONS =
     '-o, --output': 'Set output directory (default: ./docs)'
     '--commonjs  ': 'Use if target scripts use CommonJS for module loading (default)'
     '--requirejs ': 'Use if target scripts use RequireJS for module loading'
+    '--readme    ': 'Generates a README.md in the parent of the output directory'
+    '-r, --rout  ': 'Set output directory for README.md (default: ./)'
 
 help = ->
     ### Show help message and exit ###
@@ -32,20 +34,28 @@ opts = process.argv[2...process.argv.length]
 if opts.length == 0 then help()
 
 outputdir = 'docs'
-for o, idx in opts
-    if o == '-o' or o == '--output'
-        outputdir = opts[idx + 1]
-        opts.splice(idx, 2)
-        break
-if '-h' in opts or '--help' in opts
-    help()
-if '--commonjs' in opts
-    opts.shift()
-    parser = new parsers.CommonJSParser()
-else if '--requirejs' in opts
-   opts.shift()
-   parser = new parsers.RequireJSParser()
-else
+readmedir = './'
+readme = false
+parser = null
+
+while opts[0]? and opts[0].substr(0, 1) == '-'
+    console.log(opts[0])
+    o = opts.shift()
+    switch o
+        when '-h', '--help'
+            help()
+        when '-o', '--output'
+            outputdir = opts.shift()
+        when '--commonjs'
+            parser = new parsers.CommonJSParser()
+        when '--requirejs'
+            parser = new parsers.RequireJSParser()
+        when '--readme'
+            readme = true
+        when '-r', '--rout'
+            readmedir = opts.shift()
+
+if not parser?
     parser = new parsers.CommonJSParser()
 if opts.length == 0
     opts = ['.']
@@ -93,6 +103,9 @@ if sources.length > 0
                 fs.unlinkSync(target)
         rm(outputdir)
     fs.mkdirSync(outputdir, '755')
+    
+    # Create README.md
+    readmeContents = []
 
     # Iterate over source scripts
     source_names = (s.replace(/\.coffee$/, '') for s in sources)
@@ -128,6 +141,9 @@ if sources.length > 0
                         cls.parent_module = module_path
                         cls.parent_name = clspath.join('.')
 
+        # Append to README.md
+        readmeContents.push(documentation.module.docstring)
+        
         # Convert markdown to html
         renderMarkdown(documentation.module)
         for c in documentation.module.classes
@@ -155,4 +171,8 @@ if sources.length > 0
     # Make index page
     index = eco.render(index_template, modules: modules)
     fs.writeFile(path.join(outputdir, 'index.html'), index)
+    
+    # Write README.md
+    fs.writeFile(path.join(readmedir, 'README.md'), readmeContents.join('\n'))
+            
 

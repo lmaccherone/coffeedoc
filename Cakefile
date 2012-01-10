@@ -12,7 +12,7 @@ task 'install', 'install the `coffeedoc` command into /usr/local (or --prefix)',
   lib = base + '/lib/coffeedoc'
   exec([
     'mkdir -p ' + lib
-    'cp -rf bin README.md resources lib ' + lib
+    'cp -rf bin README.md resources src vendor ' + lib
     'ln -sf ' + lib + '/bin/coffeedoc ' + base + '/bin/coffeedoc'
   ].join(' && '), (err, stdout, stderr) ->
     if err then console.error stderr
