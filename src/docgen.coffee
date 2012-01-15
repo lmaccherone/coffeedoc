@@ -19,8 +19,8 @@ OPTIONS =
     '-o, --output': 'Set output directory (default: ./docs)'
     '--commonjs  ': 'Use if target scripts use CommonJS for module loading (default)'
     '--requirejs ': 'Use if target scripts use RequireJS for module loading'
-    '--readme    ': 'Generates a README.md in the parent of the output directory'
-    '-r, --rout  ': 'Set output directory for README.md (default: ./)'
+    '--readme    ': 'Generates a draft README.md from the module docstrings'
+    '-r, --rout  ': 'Set output file for README.md (defaults to stdout)'
 
 help = ->
     ### Show help message and exit ###
@@ -34,12 +34,11 @@ opts = process.argv[2...process.argv.length]
 if opts.length == 0 then help()
 
 outputdir = 'docs'
-readmedir = './'
 readme = false
+readmefile = null
 parser = null
 
 while opts[0]? and opts[0].substr(0, 1) == '-'
-    console.log(opts[0])
     o = opts.shift()
     switch o
         when '-h', '--help'
@@ -53,7 +52,7 @@ while opts[0]? and opts[0].substr(0, 1) == '-'
         when '--readme'
             readme = true
         when '-r', '--rout'
-            readmedir = opts.shift()
+            readmefile = opts.shift()
 
 if not parser?
     parser = new parsers.CommonJSParser()
@@ -173,6 +172,9 @@ if sources.length > 0
     fs.writeFile(path.join(outputdir, 'index.html'), index)
     
     # Write README.md
-    fs.writeFile(path.join(readmedir, 'README.md'), readmeContents.join('\n'))
+    if readmefile?
+      fs.writeFile(readmefile, readmeContents.join('\n'))
+    else
+      process.stdout.write(readmeContents.join('\n'))
             
 

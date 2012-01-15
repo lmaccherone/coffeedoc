@@ -8,6 +8,12 @@
     "coffeescript"
   ],
   "author": "Omar Khan",
+  "contributors": [
+    {
+      "name": "Larry Maccherone",
+      "url": "http://maccherone.com"
+    }
+  ],
   "version": "0.1.12",
   "licenses": [
     {
