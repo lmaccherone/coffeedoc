@@ -11,13 +11,7 @@ task 'build', 'continually build the coffeedoc library with --watch', ->
   coffee = spawn 'coffee', ['-cw', '-o', 'lib', 'src']
   coffee.stdout.on 'data', (data) -> console.log data.toString().trim()
 
-task 'install', 'install the `coffeedoc` command into /usr/local (or --prefix)', (options) ->
-  base = options.prefix or '/usr/local'
-  lib = base + '/lib/coffeedoc'
-  exec([
-    'mkdir -p ' + lib
-    'cp -rf bin README.md resources lib ' + lib
-    'ln -sf ' + lib + '/bin/coffeedoc ' + base + '/bin/coffeedoc'
-  ].join(' && '), (err, stdout, stderr) ->
+task 'install', 'install `coffeedoc` globally but from this source using npm', (options) ->
+  exec('npm install -g .', (err, stdout, stderr) ->
    if err then console.error stderr
   )
