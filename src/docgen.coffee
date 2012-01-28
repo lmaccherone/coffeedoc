@@ -144,12 +144,33 @@ if sources.length > 0
         readmeContents.push(documentation.module.docstring)
         
         # Convert markdown to html
+        skipModuleFunctions = []
         renderMarkdown(documentation.module)
         for c in documentation.module.classes
             renderMarkdown(c)
-            renderMarkdown(m) for m in c.staticmethods
-            renderMarkdown(m) for m in c.instancemethods
-        renderMarkdown(f) for f in documentation.module.functions
+            skipStaticMethods = []
+            skipInstanceMethods = []
+            for m, idx in c.staticmethods
+              if path.extname(m.name)[1..1] == '_'
+                skipStaticMethods.unshift(idx)
+              else
+                renderMarkdown(m)
+            for i in skipStaticMethods
+              c.staticmethods.splice(i, 1)
+            for m, idx in c.instancemethods
+              if m.name[0..0] == '_'
+                skipInstanceMethods.unshift(idx)
+              else
+                renderMarkdown(m) for m in c.instancemethods
+            for i in skipInstanceMethods
+              c.instancemethods.splice(i, 1)
+        for f, idx in documentation.module.functions
+          if f.name[0..0] == '_'
+            skipModuleFunctions.unshift(idx)
+          else
+            renderMarkdown(f) for f in documentation.module.functions
+        for i in skipModuleFunctions
+          documentation.module.functions.splice(i, 1)
 
         # Generate docs
         html = eco.render(module_template, documentation)
