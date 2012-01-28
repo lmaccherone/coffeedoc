@@ -71,6 +71,8 @@ CoffeeDoc can be run from the command line:
         -o, --output: Set output directory (default: ./docs)
         --commonjs  : Use if target scripts use CommonJS for module loading (default)
         --requirejs : Use if target scripts use RequireJS for module loading
+        --readme    : Generates a draft README.md from the module docstrings
+        -r, --rout  : Set output file for README.md (defaults to stdout)
 
 If [targets] is a directory, CoffeeDoc will recursively document all `.coffee`
 files found under that directory.
@@ -78,6 +80,9 @@ files found under that directory.
 If you wish to document several modules, make sure you generate all
 the docs with a single command -- this ensures that they will all appear in the
 `index.html` file.
+
+Note that since coffeedoc is intended to document the public API, any functions or
+methods that begin with underscore (`_`) will be omitted from the generated docs.
 
 #### Note on Markdown headers ####
 
