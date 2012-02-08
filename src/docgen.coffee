@@ -21,6 +21,7 @@ OPTIONS =
     '--requirejs ': 'Use if target scripts use RequireJS for module loading'
     '--readme    ': 'Generates a draft README.md from the module docstrings'
     '-r, --rout  ': 'Set output file for README.md (defaults to stdout)'
+    '-d, --debug ': 'Debug mode'
 
 help = ->
     ### Show help message and exit ###
@@ -37,6 +38,7 @@ outputdir = 'docs'
 readme = false
 readmefile = null
 parser = null
+debug = false
 
 while opts[0]? and opts[0].substr(0, 1) == '-'
     o = opts.shift()
@@ -53,6 +55,8 @@ while opts[0]? and opts[0].substr(0, 1) == '-'
             readme = true
         when '-r', '--rout'
             readmefile = opts.shift()
+        when '-d', '--debug'
+            debug = true
 
 if not parser?
     parser = new parsers.CommonJSParser()
@@ -87,6 +91,7 @@ getSourceFiles = (target) ->
         getSourceFiles(path.join(target, p)) for p in fs.readdirSync(target)
 getSourceFiles(o) for o in opts
 
+if debug then console.log("Sources: #{sources}")
 
 if sources.length > 0
     modules = []
@@ -109,6 +114,7 @@ if sources.length > 0
     # Iterate over source scripts
     source_names = (s.replace(/\.coffee$/, '') for s in sources)
     for source, idx in sources
+        if debug then console.log("Working on source: #{source}")
         script = fs.readFileSync(source, 'utf-8')
 
         # If source is in a subfolder, make a matching subfolder in outputdir
@@ -131,6 +137,7 @@ if sources.length > 0
 
         # Check for classes inheriting from classes in other modules
         for cls in documentation.module.classes when cls.parent
+            if debug then console.log("Checking if class #{cls} inherits from a class in another module")
             clspath = cls.parent.split('.')
             if clspath.length > 1
                 prefix = clspath.shift()
@@ -147,26 +154,27 @@ if sources.length > 0
         skipModuleFunctions = []
         renderMarkdown(documentation.module)
         for c in documentation.module.classes
+            if debug then console.log("Converting #{c} to html")
             renderMarkdown(c)
             skipStaticMethods = []
             skipInstanceMethods = []
-            for m, idx in c.staticmethods
+            for m, idx2 in c.staticmethods
               if path.extname(m.name)[1..1] == '_'
-                skipStaticMethods.unshift(idx)
+                skipStaticMethods.unshift(idx2)
               else
                 renderMarkdown(m)
             for i in skipStaticMethods
               c.staticmethods.splice(i, 1)
-            for m, idx in c.instancemethods
+            for m, idx3 in c.instancemethods
               if m.name[0..0] == '_'
-                skipInstanceMethods.unshift(idx)
+                skipInstanceMethods.unshift(idx3)
               else
                 renderMarkdown(m) for m in c.instancemethods
             for i in skipInstanceMethods
               c.instancemethods.splice(i, 1)
-        for f, idx in documentation.module.functions
+        for f, idx4 in documentation.module.functions
           if f.name[0..0] == '_'
-            skipModuleFunctions.unshift(idx)
+            skipModuleFunctions.unshift(idx4)
           else
             renderMarkdown(f) for f in documentation.module.functions
         for i in skipModuleFunctions
@@ -193,9 +201,10 @@ if sources.length > 0
     fs.writeFile(path.join(outputdir, 'index.html'), index)
     
     # Write README.md
-    if readmefile?
-      fs.writeFile(readmefile, readmeContents.join('\n'))
-    else
-      process.stdout.write(readmeContents.join('\n'))
+    if readme
+      if readmefile?
+        fs.writeFile(readmefile, readmeContents.join('\n'))
+      else
+        process.stdout.write(readmeContents.join('\n'))
             
 
