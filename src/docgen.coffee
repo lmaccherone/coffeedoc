@@ -57,6 +57,8 @@ while opts[0]? and opts[0].substr(0, 1) == '-'
             readmefile = opts.shift()
         when '-d', '--debug'
             debug = true
+        when '-p', '--packageJSON'
+            packageJSONFileName = opts.shift()
 
 if not parser?
     parser = new parsers.CommonJSParser()
@@ -81,6 +83,17 @@ base_css = fs.readFileSync(__dirname + '/../resources/base.css', 'utf-8')
 module_css = fs.readFileSync(__dirname + '/../resources/module.css', 'utf-8')
 index_css = fs.readFileSync(__dirname + '/../resources/index.css', 'utf-8')
 
+# Get package.JSON
+unless packageJSONFileName?
+  packageJSONFileName = 'package.json'
+if path.existsSync(packageJSONFileName)
+    packageJSONFileContents = fs.readFileSync(packageJSONFileName, 'utf-8')
+    packageJSON = JSON.parse(packageJSONFileContents)
+else
+    packageJSON = {}
+    packageJSON.name = ''
+    packageJSON.version = ''
+    packageJSON.description = ''
 
 # Get source file paths
 sources = []
@@ -197,7 +210,7 @@ if sources.length > 0
         fs.writeFile(path.join(resourcesdir, 'index.css'), index_css)
 
     # Make index page
-    index = eco.render(index_template, modules: modules)
+    index = eco.render(index_template, modules: modules, packageJSON: packageJSON)
     fs.writeFile(path.join(outputdir, 'index.html'), index)
     
     # Write README.md
