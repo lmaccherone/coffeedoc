@@ -52,7 +52,7 @@ interesting example, here is [the result of running coffeedoc against
 CoffeeDoc requires [Node.js][], [CoffeeScript][], and [eco][]. Install using
 npm with the following command:
 
-    sudo npm install -g coffeedoc
+    sudo npm install -g coffeedoc-lm
 
 The -g option installs CoffeeDoc globally, adding the coffeedoc executable to
 your PATH. If you would rather install locally, omit the -g option.

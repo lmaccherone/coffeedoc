@@ -1,6 +1,6 @@
 {
-  "name": "coffeedoc",
-  "description": "An API documentation generator for CoffeeScript",
+  "name": "coffeedoc-lm",
+  "description": "Fork of CoffeeDoc by Larry Maccherone - an API documentation generator for CoffeeScript",
   "keywords": [
     "documentation",
     "docs",
